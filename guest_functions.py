@@ -87,7 +87,6 @@ def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride):  # Choose 
         guest.change_status(-1)  # Tell guest to leave the park
         return  # End function
 
-    print("start checking rides")
     rides_checked = 1
     for ride in ride_types[type_choice]:  # Iterate through rides to find best
         name = ride.ret_name()
@@ -97,8 +96,8 @@ def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride):  # Choose 
                 continue
 
         popularity, wait_time = ride.choose_ride_info()
-        if popularity > 5:  # If popularity is greater than 5
-            popularity = 5  # Use same conditions as if it were 5
+        if popularity > 4:  # If popularity is greater than 5
+            popularity = 4  # Use same conditions as if it were 5
         if wait_time < max_waits[popularity]:  # If wait is 'tolerable'
             add_to_queue(name, guest, ride)  # Put into queue
             return  # End function
