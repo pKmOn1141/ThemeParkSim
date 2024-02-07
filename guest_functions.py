@@ -74,12 +74,27 @@ def choose_type(a, b, ride_types):  # Choose the ride type based on the limits
     return r_type
 
 
-def add_to_queue(name, guest, ride):  # Add guest into ride queue
-    guest.add_ride(name)
-    ride.into_queue(guest)  # Put into queue
+def add_to_queue(name, guest, ride, fp):  # Add guest into ride queue
+    match fp:
+        case 1:  # Use fastpass queue
+            print("added to fastpass")
+            guest.add_ride(name)
+            ride.into_fast(guest)  # Put into queue
+        case 0:  # Use normal queue
+            print("added to normal queue")
+            guest.add_ride(name)
+            ride.into_queue(guest)
 
 
-def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride):  # Choose ride, customisable for each personality
+def choose_queue(fp_c):  # Choose whether to use fast pass queue or normal
+    rand_num = random.random()  # Pick a random number between 0-1
+    if rand_num < fp_c:  # Use a fastpass
+        return 1  # Guest uses fastpass queue
+    else:
+        return 0  # Guest uses normal queue
+
+
+def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride, fp_c):  # Choose ride, customisable for each personality
     # max_waits=array of times, a/b=for type choice, ride_types=array of rides, guest=guest object
     type_choice = choose_type(a, b, ride_types)  # Choose type, except for kids
 
@@ -99,11 +114,13 @@ def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride):  # Choose 
         if popularity > 4:  # If popularity is greater than 5
             popularity = 4  # Use same conditions as if it were 5
         if wait_time < max_waits[popularity]:  # If wait is 'tolerable'
-            add_to_queue(name, guest, ride)  # Put into queue
+            fp = choose_queue(fp_c)
+            add_to_queue(name, guest, ride, fp)  # Put into queue
             return  # End function
         elif wait_time > max_waits[popularity]:  # Skip to next ride
             if rides_checked == len(ride_types[type_choice]):  # If looking at last ride
-                add_to_queue(name, guest, ride)  # Put into queue
+                fp = choose_queue(fp_c)
+                add_to_queue(name, guest, ride, fp)  # Put into queue
                 return  # End function
             else:  # Go to next ride
                 rides_checked += 1
@@ -120,28 +137,33 @@ def choose_ride(guest, ride_types):  # Incomplete
     match personality:
         case 0:  # Average
             max_waits = [140, 110, 80, 60, 40]  # How long they can wait for each ride popularity
+            fp_chance = 0.2  # Chance guest has a fast pass
             multi_ride = False  # Cant ride the same rides more than once
-            make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride)  # Finds ride and puts guest on it
+            make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride, fp_chance)  # Finds ride and puts guest on it
 
         case 1:  # Enthusiast
             max_waits = [170, 130, 90, 65, 45]
+            fp_chance = 0.15
             multi_ride = True
-            make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride)
+            make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride, fp_chance)
 
         case 2:  # Tame rider
             max_waits = [125, 95, 70, 50, 30]
+            fp_chance = 0.1
             multi_ride = True
-            make_ride_choice(max_waits, 1, 3, ride_types, guest, multi_ride)
+            make_ride_choice(max_waits, 1, 3, ride_types, guest, multi_ride, fp_chance)
 
         case 3:  # thrillseeker
             max_waits = [170, 135, 100, 70, 40]
+            fp_chance = 0.25
             multi_ride = True
-            make_ride_choice(max_waits, 3, 6, ride_types, guest, multi_ride)
+            make_ride_choice(max_waits, 3, 6, ride_types, guest, multi_ride, fp_chance)
 
         case 4:  # Child
             max_waits = [110, 80, 60, 40, 25]
+            fp_chance = 0.15
             multi_ride = True
-            make_ride_choice(max_waits, 0, 3, ride_types, guest, multi_ride)
+            make_ride_choice(max_waits, 0, 3, ride_types, guest, multi_ride, fp_chance)
 
 
 def check_guest(guest, park, ride_types):  # Checks what to do for each guest
