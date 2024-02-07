@@ -8,8 +8,9 @@ if __name__ == '__main__':
     rides = []
     max_guests = 0
     max_turns = 0
+    fp_ratio = 0
 
-    rides, max_guests, max_turns = main_menu(rides, max_guests, max_turns)  # Main menu
+    rides, max_guests, max_turns, fp_ratio = main_menu(rides, max_guests, max_turns, fp_ratio)  # Main menu
     print("")
     # Prints key variables for testing
     print(rides, max_guests, max_turns)
@@ -33,7 +34,7 @@ if __name__ == '__main__':
         while current_turn <= max_turns:
 
             for current_ride in rides:  # Check all the rides
-                check_ride(current_ride, park)
+                check_ride(current_ride, park, fp_ratio)
 
             for current_guest in guest_list:  # Check all guests
                 check_guest(current_guest, park, ride_types)

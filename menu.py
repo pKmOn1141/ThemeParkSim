@@ -61,12 +61,14 @@ def remove_ride(rides):  # Removes target ride
             print("Ride removed")
 
 
-def edit_settings(guests, turns):
+def edit_settings(guests, turns, fp_ratio):
 
     new_guests = int_validation(f'Current max guests = {guests}, enter new max: ')
     new_turns = int_validation(f'Current max turns = {turns}, enter new max: ')
+    new_fp_ratio = flt_validation(f'Current fp ratio = {fp_ratio}, enter as decimal (0, .5, .75, .8): ')
+    print(new_fp_ratio)
 
-    return new_guests, new_turns
+    return new_guests, new_turns, new_fp_ratio
 
 
 def start_sim():
@@ -74,7 +76,7 @@ def start_sim():
     pass
 
 
-def main_menu(rides, guests, turns):  # Main menu function
+def main_menu(rides, guests, turns, fp_ratio):  # Main menu function
 
     options = {
         1: "edit_ride(rides)",
@@ -93,14 +95,14 @@ def main_menu(rides, guests, turns):  # Main menu function
 
         choice = int_validation("Input option: ")
         if choice == 2:
-            guests, turns = edit_settings(guests, turns)
+            guests, turns, fp_ratio = edit_settings(guests, turns, fp_ratio)
         elif choice == 3:
             finished = True
             eval(options[choice])
         else:
             eval(options[choice])
 
-    return rides, guests, turns
+    return rides, guests, turns, fp_ratio
 
 
 if __name__ == '__main__':

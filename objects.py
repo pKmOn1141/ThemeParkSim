@@ -73,24 +73,40 @@ class Guest(object):
 class RQueues(object):
     def __init__(self):
         self._queue = q.Queue()
+        self._fast_queue = q.Queue()
         self._ride = q.Queue()
 
     def into_queue(self, item):  # Puts guest from park into queue
         item.change_status(2)
         self._queue.put_nowait(item)
 
-    def onto_ride(self):  # Puts the guest from queue onto ride
-        guest = self._queue.get_nowait()
-        guest.change_status(3)
-        self._ride.put_nowait(guest)
+    def into_fast(self, item):  # Puts guest from park into fast past queue
+        item.change_status(2)
+        self._fast_queue.put_nowait(item)
+
+    def onto_ride(self, q_type):  # Puts the guest from queue onto ride
+        # q_type: 0 = normal, 1 = fast pass
+        match q_type:
+            case 0:  # If coming from normal queue
+                print("loading from normal")
+                guest = self._queue.get_nowait()
+                guest.change_status(3)
+                self._ride.put_nowait(guest)
+
+            case 1:  # If coming from fast pass queue
+                print("loading from fp")
+                guest = self._fast_queue.get_nowait()
+                guest.change_status(3)
+                self._ride.put_nowait(guest)
 
     def off_ride(self, park):  # Moves the guest off the ride and into the park
         guest = self._ride.get_nowait()
         guest.change_status(4)  # Just got off ride
         park.add_to(guest)
 
-    def update_queues(self, queue, ride):
+    def update_queues(self, queue, fast, ride):
         self._queue = queue
+        self._fast_queue = fast
         self._ride = ride
 
     def queue_time(self):  # Return the size of the queue to work out the time
@@ -98,6 +114,9 @@ class RQueues(object):
 
     def ret_queue(self):
         return self._queue
+
+    def ret_fast(self):  # Return fast pass queue
+        return self._fast_queue
 
     def ret_ride(self):
         return self._ride
@@ -117,7 +136,6 @@ class Ride(object):
         self._current_wait = 0
 
     def wait_time(self):  # Works out the wait time after every turn
-        print(self._current_wait)
         q_size = self._queues.queue_time()
         wait_time = (q_size // self._ride_cap) * self._ride_time  # Calculates the wait time
         self._current_wait = wait_time
@@ -125,14 +143,16 @@ class Ride(object):
     def ret_wait_time(self):
         return self._current_wait
 
-    def ret_ride_queues(self):
-        return self._queues.ret_queue(), self._queues.ret_ride(), self._ride_cap, self._current_riders
+    def ret_ride_queues(self):  # Return ride queues and infomation
+        return self._queues.ret_queue(), self._queues.ret_ride(), self._ride_cap, self._current_riders, self._queues.ret_fast()
 
     def ret_check_ride(self):
         return self._name, self._ride_time, self._ride_turn
 
-    def queue_empty(self):  # Returns True if rides queue is empty
-        return self._queues.ret_queue().empty()
+    def queues_empty(self):  # Returns True if rides queue is empty
+        queue = self._queues.ret_queue().empty()
+        fp = self._queues.ret_fast().empty()
+        return queue and fp
 
     def ret_ride_info(self):
         return self._name, self._ride_time, self._ride_cap, self._ride_pop, self._ride_type
@@ -146,24 +166,33 @@ class Ride(object):
     def ret_rt(self):  # Return the rides type
         return self._ride_type
 
+    def ret_fp(self):  # Return queue
+        return self._queues.ret_fast()
+
     def into_queue(self, item):
         self._queues.into_queue(item)
 
-    def onto_ride(self):
-        self._queues.onto_ride()
+    def into_fast(self, item):  # Put into fast pass queue
+        self._queues.into_fast(item)
+
+    def onto_ride(self, q_type):
+        self._queues.onto_ride(q_type)
 
     def off_ride(self, park):
         self._queues.off_ride(park)
 
-    def fin_check_ride(self, ride_turn, rq, ride):  # Update attributes after ride_check function
+    def fin_check_ride(self, ride_turn, rq, ride, fp):  # Update attributes after ride_check function
         self._ride_turn = ride_turn
-        self._queues.update_queues(rq, ride)
+        self._queues.update_queues(rq, fp, ride)
 
     def upd_curr_riders(self):
         self._current_riders += 1
 
     def rst_curr_riders(self):
         self._current_riders = 0
+
+    def ret_curr_riders(self):
+        return self._current_riders
 
     def choose_ride_info(self):  # Return info needed for the choose_ride function
         return self._ride_pop, self._current_wait

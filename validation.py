@@ -14,6 +14,20 @@ def int_validation(output):  # Validates if an input is an integer
     return inp
 
 
+def flt_validation(output):  # Validates input is a float
+    correct = False
+    inp = 0.0
+    while not correct:
+        inp = input(output)
+        try:
+            inp = float(inp)
+            correct = True
+        except ValueError:
+            print("Invalid input, needs to be float, try again")
+
+    return inp
+
+
 def str_validation(output):  # Validates that an input is a string
     correct = False
     inp = ""
