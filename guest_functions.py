@@ -166,8 +166,15 @@ def choose_ride(guest, ride_types):  # Incomplete
             make_ride_choice(max_waits, 0, 3, ride_types, guest, multi_ride, fp_chance)
 
 
-def check_guest(guest, park, ride_types):  # Checks what to do for each guest
-    wait_time, queue_status = guest.ret_info()
+def choose_amenity(amenities):  # Choose an amenity to use, and return how long the guest will be using that amenity
+    choice = random.choice(amenities)
+    time = choice.time_to_spend()  # Find time to spend for chosen amenity
+
+    return time
+
+
+def check_guest(guest, park, ride_types, any_amenities, amenities):  # Checks what to do for each guest
+    wait_time, queue_status, time_left = guest.ret_info()
 
     match queue_status:
         case -2:  # Ignore guest
@@ -182,10 +189,23 @@ def check_guest(guest, park, ride_types):  # Checks what to do for each guest
             guest.change_status(1)
 
         case 1:  # If guest is in park
-            # Pick a queue to go into and enter it
-            guest.change_status(2)
-            guest.update_rides_ridden()
-            choose_ride(guest, ride_types)
+            if not any_amenities:  # If there are no amenities, skip straight to choosing ride
+                guest.change_status(2)
+                guest.update_rides_ridden()
+                choose_ride(guest, ride_types)
+
+            else:  # If there are amenities, pick whether to go on ride or use amenity
+                amenity_chance = 0.2  # Chance that guest wants to use an amenity
+                choice = random.random()  # Pick random number between 0-1
+                if choice < amenity_chance:  # If chose to use amenity
+                    guest.change_status(5)
+                    time = choose_amenity(amenities)
+                    guest.set_time_left(time)
+
+                else:  # Pick a queue to go into and enter it
+                    guest.change_status(2)
+                    guest.update_rides_ridden()
+                    choose_ride(guest, ride_types)
 
         case 2:  # If guest in a queue
             guest.update_time()
@@ -195,6 +215,13 @@ def check_guest(guest, park, ride_types):  # Checks what to do for each guest
 
         case 4:  # If just got off ride
             guest.change_status(1)
+        
+        case 5:  # If using an amenity
+            if time_left == 0:  # If need to leave amenity
+                guest.change_status(1)
+
+            else:  # If still have time left
+                guest.upd_time_left()  # Reduce time left by 1
 
 
 if __name__ == '__main__':

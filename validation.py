@@ -42,18 +42,18 @@ def str_validation(output):  # Validates that an input is a string
     return inp
 
 
-def name_validation(output, rides):  # Validates names specifically for making rides
+def name_validation(output, array):  # Validates names specifically for making rides/amenities
 
-    if len(rides) == 0:  # If list is empty
+    if len(array) == 0:  # If list is empty
         return str_validation(output)
 
-    ride_names = []
-    for i in range(0, len(rides)):  # Add ride names to check
-        ride_names.append(rides[i].ret_name().lower())
+    type_names = []
+    for i in range(0, len(array)):  # Add ride names to check
+        type_names.append(array[i].ret_name().lower())
 
     while True:  # If not, iterate until valid input
         inp = str_validation(output)
-        if inp not in ride_names:
+        if inp not in type_names:
             break
         else:
             print("Name already used")

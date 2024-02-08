@@ -6,11 +6,12 @@ from imports import *
 if __name__ == '__main__':
 
     rides = []
+    amenities = []
     max_guests = 0
     max_turns = 0
     fp_ratio = 0
 
-    rides, max_guests, max_turns, fp_ratio = main_menu(rides, max_guests, max_turns, fp_ratio)  # Main menu
+    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, max_guests, max_turns, fp_ratio, amenities)  # Main menu
     print("")
     # Prints key variables for testing
     print(rides, max_guests, max_turns)
@@ -25,6 +26,12 @@ if __name__ == '__main__':
     # Creates the park
     park = Park(max_guests)
 
+    # Check if there are any amenities
+    if len(amenities) < 1:
+        any_amenities = False
+    else:  # If there are amenities
+        any_amenities = True
+
     # Start of simulation
     if len(rides) == 0:  # Check if there are any rides
         print("no rides, cancelling simulation")
@@ -37,7 +44,7 @@ if __name__ == '__main__':
                 check_ride(current_ride, park, fp_ratio)
 
             for current_guest in guest_list:  # Check all guests
-                check_guest(current_guest, park, ride_types)
+                check_guest(current_guest, park, ride_types, any_amenities, amenities)
 
             current_turn += 1
         # End of simulation

@@ -1,6 +1,7 @@
 # Object file, containing all the class declarations and methods
 
 import queue as q
+import random
 
 
 class Park(object):
@@ -31,9 +32,10 @@ class Guest(object):
         self._rides_ridden = 0
         self._rides = []  # Array of the rides ridden
         self._queue_status = 0
-        # 0 = not in anything, 1 = in park, 2 = in queue, 3 = on ride, 4 = just off ride, -1 = leaving park, -2 = gone from park
+        # 0=not in anything, 1=in park, 2=in queue, 3=on ride, 4=just off ride, 5=in amenity, -1=leaving park, -2=gone from park
         self._personality = -1
         # -1=unassigned, 0=average, 1=enthusiast, 2=tame, 3=thrillseeker, 4=child
+        self._time_left = 0  # Time left to spend at amenity
 
     def assign_p(self, personality):  # Assign guest personality
         self._personality = personality
@@ -42,7 +44,7 @@ class Guest(object):
         return self._personality
 
     def ret_info(self):
-        return self._wait_time, self._queue_status
+        return self._wait_time, self._queue_status, self._time_left
 
     def ret_name(self):
         return self._name
@@ -68,6 +70,12 @@ class Guest(object):
     def change_status(self, value):  # Change the queue_status attribute
         # Look above for what each value means
         self._queue_status = value
+
+    def set_time_left(self, item):  # Set the time left to spend at amenity
+        self._time_left = item
+
+    def upd_time_left(self):  # Updates how long left to spend at amenity
+        self._time_left -= 1
 
 
 class RQueues(object):
@@ -196,6 +204,20 @@ class Ride(object):
 
     def choose_ride_info(self):  # Return info needed for the choose_ride function
         return self._ride_pop, self._current_wait
+
+
+class Amenity(object):  # Shops/Other services
+    def __init__(self, name, time):
+        self._name = name
+        self._time = time  # Time spent at service
+
+    def time_to_spend(self):  # Returns how long guest should spend at amenity
+        time = self._time
+        times = [time-1, time, time+1]  # How long guest can spend at amenity, varying for each
+        return random.choice(times)
+
+    def ret_name(self):
+        return self._name
 
 
 if __name__ == '__main__':

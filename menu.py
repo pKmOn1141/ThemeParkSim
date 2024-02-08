@@ -71,18 +71,55 @@ def edit_settings(guests, turns, fp_ratio):
     return new_guests, new_turns, new_fp_ratio
 
 
-def start_sim():
+def add_amenity(amenities):
+    a_name = name_validation("Enter amenity name: ", amenities)
+    a_time = int_validation("Enter time to spend at amenity: ")
 
-    pass
+    amenity = Amenity(a_name, a_time)
+    amenities.append(amenity)
+
+    return
 
 
-def main_menu(rides, guests, turns, fp_ratio):  # Main menu function
+def remove_amenity(amenities):
+    if len(amenities) == 0:  # If list empty
+        print("No amenities to remove")
+        return
+    else:
+        target_amenity = str_validation("Enter amenity name to remove: ")
+        index = -1
+        for current in range(0, len(amenities)):
+            if amenities[current].ret_name().lower() == target_amenity.lower():
+                index = current
+                break
 
-    options = {
-        1: "edit_ride(rides)",
-        2: "edit_park(guests, turns)",
-        3: "start_sim()"
-    }
+        if index == -1:  # If item not found
+            print("Couldn't find amenity")
+        else:
+            amenities.remove(amenities[index])
+            print("Amenity removed")
+
+
+def edit_amenities(amenities):
+    finished = False
+    while not finished:
+        print("")
+        print("Amenities - Select Option")
+        print("1. Add Amenity")
+        print("2. Remove Amenity")
+        print("3. Go back")
+
+        choice = int_validation("Input option: ")
+        match choice:
+            case 1:
+                add_amenity(amenities)
+            case 2:
+                remove_amenity(amenities)
+            case 3:
+                return
+
+
+def main_menu(rides, guests, turns, fp_ratio, amenities):  # Main menu function
 
     finished = False
     while not finished:
@@ -91,18 +128,19 @@ def main_menu(rides, guests, turns, fp_ratio):  # Main menu function
         print("Select Option")
         print("1. Edit rides")
         print("2. Edit park settings")
-        print("3. Start sim")
+        print("3. Edit amenities")
+        print("4. Start sim")
 
         choice = int_validation("Input option: ")
-        if choice == 2:
-            guests, turns, fp_ratio = edit_settings(guests, turns, fp_ratio)
-        elif choice == 3:
-            finished = True
-            eval(options[choice])
-        else:
-            eval(options[choice])
-
-    return rides, guests, turns, fp_ratio
+        match choice:
+            case 1:
+                edit_ride(rides)
+            case 2:
+                guests, turns, fp_ratio = edit_settings(guests, turns, fp_ratio)
+            case 3:
+                edit_amenities(amenities)
+            case 4:
+                return rides, guests, turns, fp_ratio, amenities
 
 
 if __name__ == '__main__':
