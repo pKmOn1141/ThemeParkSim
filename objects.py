@@ -213,7 +213,10 @@ class Amenity(object):  # Shops/Other services
 
     def time_to_spend(self):  # Returns how long guest should spend at amenity
         time = self._time
-        times = [time-1, time, time+1]  # How long guest can spend at amenity, varying for each
+        if time == 1:
+            times = [time, time + 1]  # Means guest cant spend 0 time
+        else:
+            times = [time-1, time, time+1]  # How long guest can spend at amenity, varying for each
         return random.choice(times)
 
     def ret_name(self):
