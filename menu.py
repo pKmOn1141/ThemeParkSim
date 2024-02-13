@@ -34,8 +34,9 @@ def add_ride(rides):  # Asks for ride info and creates object
     ride_cap = int_validation("Enter ride capacity: ")
     ride_pop = int_validation("Enter ride popularity: ")
     ride_type = int_validation("Enter ride type (0-6 or else it breaks): ")
+    ride_relia = int_validation("Enter avrg breakdowns per day: ")
 
-    ride = Ride(ride_name, ride_time, ride_cap, ride_pop, ride_type)
+    ride = Ride(ride_name, ride_time, ride_cap, ride_pop, ride_type, ride_relia)
     rides.append(ride)
     for i in range(0, len(rides)):
         print(rides[i].ret_ride_info())
@@ -129,7 +130,7 @@ def main_menu(rides, guests, turns, fp_ratio, amenities):  # Main menu function
         print("1. Edit rides")
         print("2. Edit park settings")
         print("3. Edit amenities")
-        print("4. Start sim")
+        print("4. Start Sim")
 
         choice = int_validation("Input option: ")
         match choice:

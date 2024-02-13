@@ -2,6 +2,7 @@
 
 import queue as q
 import random
+from numpy import random as p  # Labelled different to destinct from random
 
 
 class Park(object):
@@ -96,13 +97,11 @@ class RQueues(object):
         # q_type: 0 = normal, 1 = fast pass
         match q_type:
             case 0:  # If coming from normal queue
-                print("loading from normal")
                 guest = self._queue.get_nowait()
                 guest.change_status(3)
                 self._ride.put_nowait(guest)
 
             case 1:  # If coming from fast pass queue
-                print("loading from fp")
                 guest = self._fast_queue.get_nowait()
                 guest.change_status(3)
                 self._ride.put_nowait(guest)
@@ -130,18 +129,91 @@ class RQueues(object):
         return self._ride
 
 
+class Breakdowns(object):  # Stores the conditions of a ride breaking down
+    def __init__(self, start_turn, duration):
+        self._start_turn = start_turn  # Turn where breakdown starts
+        self._duration = duration
+
+    def ret_start(self):
+        return self._start_turn
+
+    def ret_info(self):
+        return self._start_turn, self._duration
+
+
 class Ride(object):
-    def __init__(self, name, rl, rc, rp, rt):
+    def __init__(self, name, rl, rc, rp, rt, rr):
         self._name = name
         self._ride_time = rl  # How long ride lasts
         self._ride_cap = rc  # How many people fit on ride
         self._ride_pop = rp  # Ride popularity
         self._ride_type = rt
         # 0=kids, 1=small coaster, 2=small flat, 3=dark, 4=big flat, 5=big coasts, 6=insane
+        self._ride_reliability = rr  # Average daily breakdowns
+        self._breakdowns = 0  # How many times the ride will break down
+        self._bd_schedu = []  # At what turns the ride is going to breakdown
+        self._bd_status = False  # Status of whether ride is broken down or not
+        self._bd_time = 0  # How long left till 'fixed'
         self._queues = RQueues()
         self._ride_turn = 0
         self._current_riders = 0
         self._current_wait = 0
+
+    def breakdowns(self, turns, min_b, max_b):  # Works out how many times it will break down in the 'day'
+        amount = p.poisson(lam=self._ride_reliability, size=1)  # Amount of times it's going to break down
+        amount = amount[0]
+        print(f'amount = {amount}')
+        self._breakdowns = amount
+        if amount == 0:
+            return
+        else:
+            start_times = [-1]
+            for i in range(0, amount):
+                duration = random.randrange(min_b, max_b)  # How long ride will be broken down for
+                start_turn = -1
+                while start_turn in start_times:
+                    start_turn = random.randrange(10, turns-duration)  # Pick when to breakdown in the range
+
+                start_times.append(start_turn)
+                print(start_turn, duration)
+                self._bd_schedu.append(Breakdowns(start_turn, duration))
+
+        # Sort list by start time, so it doesn't need to check everytime
+        arr = self._bd_schedu
+        n = len(arr)
+        swapped = True
+        if n > 1:
+            while swapped:  # Iterate until no swaps done, bubble sort
+                for i in range(n-1):
+                    for j in range(0, n-i-1):
+                        if arr[j].ret_start() > arr[j+1].ret_start():
+                            swapped = True
+                            arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                        else:
+                            swapped = False
+
+        print("printing breakdowns")
+        for i in self._bd_schedu:
+            print(i.ret_start())
+
+    def ret_bd_stats(self):  # Return information related to breakdowns
+        array = self._bd_schedu
+        if len(array) > 0:  # If breakdowns, act as normal
+            return self._bd_schedu[0], self._bd_status, self._bd_time
+        elif len(array) == 0:  # If no breakdowns
+            return -1, self._bd_status, self._bd_time
+
+    def set_bd_time(self, value):
+        self._bd_time = value
+
+    def set_bd_status(self, value):
+        self._bd_status = value
+
+    def rem_breakdown(self):  # Remove the first breakdown in the array
+        self._bd_schedu.pop(0)
+
+    def upd_bd_time(self):  # Updates the breakdown time left on a ride
+        self._bd_time -= 1
 
     def wait_time(self):  # Works out the wait time after every turn
         q_size = self._queues.queue_time()
@@ -163,7 +235,7 @@ class Ride(object):
         return queue and fp
 
     def ret_ride_info(self):
-        return self._name, self._ride_time, self._ride_cap, self._ride_pop, self._ride_type
+        return self._name, self._ride_time, self._ride_cap, self._ride_pop, self._ride_type, self._ride_reliability
 
     def ret_name(self):
         return self._name

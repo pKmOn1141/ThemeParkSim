@@ -77,11 +77,9 @@ def choose_type(a, b, ride_types):  # Choose the ride type based on the limits
 def add_to_queue(name, guest, ride, fp):  # Add guest into ride queue
     match fp:
         case 1:  # Use fastpass queue
-            print("added to fastpass")
             guest.add_ride(name)
             ride.into_fast(guest)  # Put into queue
         case 0:  # Use normal queue
-            print("added to normal queue")
             guest.add_ride(name)
             ride.into_queue(guest)
 

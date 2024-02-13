@@ -35,7 +35,6 @@ def order_by_pop(ride_types):  # Order each type of ride by their popularity
                         else:
                             done_sort = True
 
-    print(ride_types)
     return ride_types
 
 
@@ -66,26 +65,48 @@ def load_ride(curr_ride, ride_cap, fp_r):  # Loads the ride with guests from the
     return  # End function
 
 
-def check_ride(curr_ride, park, fp_r):  # Checks what to do with rides
+def check_ride(curr_ride, park, fp_r, curr_turn):  # Checks what to do with rides
     name, max_turn, ride_turn = curr_ride.ret_check_ride()  # Get ride information
     rq, ride, ride_cap, current_rides, fp_q = curr_ride.ret_ride_queues()  # Get ride queues and queue info
+    next_bd, bd_status, bd_time = curr_ride.ret_bd_stats()  # Get breakdown stats
 
-    match True:
-        case _ if curr_ride.queues_empty():  # If no one is there to be loaded
-            return
+    if next_bd == -1:  # If there are no breakdowns
+        bd_start, bd_duration = -1, 0  # Set to negative value so it skips checks
+    else:
+        bd_start, bd_duration = next_bd.ret_info()  # Get exact breakdown info
 
-        case _ if ride_turn == max_turn:  # If ride needs to stop
-            ride_turn = 0
-            for space in range(0, current_rides):  # Takes guests off ride
-                curr_ride.off_ride(park)
-            curr_ride.rst_curr_riders()
-            curr_ride.fin_check_ride(ride_turn, rq, ride, fp_q)  # Updates all info
-            return
+    if curr_turn == bd_start:  # If ride needs to breakdown
+        print(f'{name} broke down')
+        curr_ride.set_bd_status(True)
+        curr_ride.set_bd_time(bd_duration)
+        curr_ride.upd_bd_time()  # Include this turn in the breakdown duration
+        curr_ride.rem_breakdown()  # Removes current breakdown from array
+    elif bd_status:  # If ride broken down
+        curr_ride.upd_bd_time()
+        if bd_time == 0:  # If 'fixed'
+            curr_ride.set_bd_status(False)
+            print(f'{name} fixed')
+    else:  # If ride isn't broken down, do normal stuff
+        match True:
+            case _ if curr_ride.queues_empty():  # If no one is there to be loaded
+                return
 
-        case _ if ride_turn == 0:  # If ride needs to be loaded
-            load_ride(curr_ride, ride_cap, fp_r)
+            case _ if ride_turn == max_turn:  # If ride needs to stop
+                ride_turn = 0
+                print(f'{name} unloading')
+                for space in range(0, current_rides):  # Takes guests off ride
+                    curr_ride.off_ride(park)
+                curr_ride.rst_curr_riders()
+                curr_ride.fin_check_ride(ride_turn, rq, ride, fp_q)  # Updates all info
+                return
 
-    ride_turn += 1  # Increase ride turns
+            case _ if ride_turn == 0:  # If ride needs to be loaded
+                load_ride(curr_ride, ride_cap, fp_r)
+                print(f'{name} loaded')
+
+        ride_turn += 1  # Increase ride turns, only when not broken down
+        print(f'{name} turn increased')
+
     curr_ride.wait_time()  # Find the wait time at the end of the run
     curr_ride.fin_check_ride(ride_turn, rq, ride, fp_q)  # Updates all new info
     return

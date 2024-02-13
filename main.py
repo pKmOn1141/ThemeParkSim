@@ -10,6 +10,8 @@ if __name__ == '__main__':
     max_guests = 0
     max_turns = 0
     fp_ratio = 0
+    min_break = 1
+    max_break = 8
 
     rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, max_guests, max_turns, fp_ratio, amenities)  # Main menu
     print("")
@@ -17,6 +19,10 @@ if __name__ == '__main__':
     print(rides, max_guests, max_turns)
 
     guest_list = initialise_guests(max_guests)  # Sets up the guests
+
+    # Sets up breakdown settings for rides
+    for curr_ride in rides:
+        curr_ride.breakdowns(max_turns, min_break, max_break)
 
     # Ordering rides for guest checking
     ride_types = [[], [], [], [], [], [], []]  # Initialise the empty array
@@ -39,9 +45,10 @@ if __name__ == '__main__':
         current_turn = 1
         print("started simulation")
         while current_turn <= max_turns:
+            print(current_turn)
 
             for current_ride in rides:  # Check all the rides
-                check_ride(current_ride, park, fp_ratio)
+                check_ride(current_ride, park, fp_ratio, current_turn)
 
             for current_guest in guest_list:  # Check all guests
                 check_guest(current_guest, park, ride_types, any_amenities, amenities)
