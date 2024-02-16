@@ -18,30 +18,36 @@ if __name__ == '__main__':
     # Prints key variables for testing
     print(rides, max_guests, max_turns)
 
-    guest_list = initialise_guests(max_guests)  # Sets up the guests
-
-    # Sets up breakdown settings for rides
-    for curr_ride in rides:
-        curr_ride.breakdowns(max_turns, min_break, max_break)
-
-    # Ordering rides for guest checking
-    ride_types = [[], [], [], [], [], [], []]  # Initialise the empty array
-    ride_types = order_by_type(ride_types, rides)  # Storing what rides of each type are in 2d array
-    ride_types = order_by_pop(ride_types)  # Order the arrays by ride popularity
-
-    # Creates the park
-    park = Park(max_guests)
-
     # Check if there are any amenities
     if len(amenities) < 1:
         any_amenities = False
     else:  # If there are amenities
         any_amenities = True
 
-    # Start of simulation
-    if len(rides) == 0:  # Check if there are any rides
-        print("no rides, cancelling simulation")
+    # Pre-simulation checks
+    if len(rides) == 0 or max_guests == 0 or max_turns == 0:
+        ready_to_start = False
     else:
+        ready_to_start = True
+
+    # Simulation
+    if not ready_to_start:
+        print("Key variables invalid, cancelling simulation")
+    else:
+        guest_list = initialise_guests(max_guests)  # Sets up the guests
+
+        # Sets up breakdown settings for rides
+        for curr_ride in rides:
+            curr_ride.breakdowns(max_turns, min_break, max_break)
+
+        # Ordering rides for guest checking
+        ride_types = [[], [], [], [], [], [], []]  # Initialise the empty array
+        ride_types = order_by_type(ride_types, rides)  # Storing what rides of each type are in 2d array
+        ride_types = order_by_pop(ride_types)  # Order the arrays by ride popularity
+
+        # Creates the park
+        park = Park(max_guests)
+
         current_turn = 1
         print("started simulation")
         while current_turn <= max_turns:
