@@ -135,31 +135,31 @@ def choose_ride(guest, ride_types):  # Incomplete
     match personality:
         case 0:  # Average
             max_waits = [140, 110, 80, 60, 40]  # How long they can wait for each ride popularity
-            fp_chance = 0.2  # Chance guest has a fast pass
+            fp_chance = 0.35  # Chance guest has a fast pass
             multi_ride = False  # Cant ride the same rides more than once
             make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride, fp_chance)  # Finds ride and puts guest on it
 
         case 1:  # Enthusiast
             max_waits = [170, 130, 90, 65, 45]
-            fp_chance = 0.15
+            fp_chance = 0.25
             multi_ride = True
             make_ride_choice(max_waits, 1, 6, ride_types, guest, multi_ride, fp_chance)
 
         case 2:  # Tame rider
             max_waits = [125, 95, 70, 50, 30]
-            fp_chance = 0.1
+            fp_chance = 0.2
             multi_ride = True
             make_ride_choice(max_waits, 1, 3, ride_types, guest, multi_ride, fp_chance)
 
         case 3:  # thrillseeker
             max_waits = [170, 135, 100, 70, 40]
-            fp_chance = 0.25
+            fp_chance = 0.35
             multi_ride = True
             make_ride_choice(max_waits, 3, 6, ride_types, guest, multi_ride, fp_chance)
 
         case 4:  # Child
             max_waits = [110, 80, 60, 40, 25]
-            fp_chance = 0.15
+            fp_chance = 0.2
             multi_ride = True
             make_ride_choice(max_waits, 0, 3, ride_types, guest, multi_ride, fp_chance)
 
