@@ -2,6 +2,7 @@
 
 from validation import *
 from objects import *
+from data_saving import *
 
 
 def edit_ride(rides):  # Ride editing menu
@@ -120,6 +121,48 @@ def edit_amenities(amenities):
                 return
 
 
+def save_data(rides, amenities, guests, turns, fp_ratio):
+    print(rides)
+    print(amenities)
+    save_to_file(rides, amenities, [guests, turns, fp_ratio])
+
+
+def load_data(rides, amenities):
+    # Try to see if the file selected exists
+    valid_name = False
+    while not valid_name:
+        file_name = str_validation("Enter file name: ") + ".txt"
+        try:
+            f = open(file_name, 'r')
+            valid_name = True
+            f.close()
+        except FileNotFoundError:
+            print("File doesnt exist")
+            return
+
+    m_guests, m_turns, fp_r = read_from_file(file_name, rides, amenities)
+    return m_guests, m_turns, fp_r
+
+
+def data_imports(rides, amenities, guests, turns, fp_ratio):
+    finished = False
+    while not finished:
+        print(" ")
+        print("Save/Load Data")
+        print("1. Save data")
+        print("2. Load data")
+        print("3. Go back")
+
+        choice = int_validation("Input option: ")
+        match choice:
+            case 1:
+                save_data(rides, amenities, guests, turns, fp_ratio)
+            case 2:
+                guests, turns, fp_ratio = load_data(rides, amenities)
+            case 3:
+                return guests, turns, fp_ratio
+
+
 def main_menu(rides, guests, turns, fp_ratio, amenities):  # Main menu function
 
     finished = False
@@ -130,7 +173,8 @@ def main_menu(rides, guests, turns, fp_ratio, amenities):  # Main menu function
         print("1. Edit rides")
         print("2. Edit park settings")
         print("3. Edit amenities")
-        print("4. Start Sim")
+        print("4. Save/Load settings")
+        print("5. Start Sim")
 
         choice = int_validation("Input option: ")
         match choice:
@@ -141,6 +185,8 @@ def main_menu(rides, guests, turns, fp_ratio, amenities):  # Main menu function
             case 3:
                 edit_amenities(amenities)
             case 4:
+                guests, turns, fp_ratio = data_imports(rides, amenities, guests, turns, fp_ratio)
+            case 5:
                 return rides, guests, turns, fp_ratio, amenities
 
 

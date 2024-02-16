@@ -76,7 +76,6 @@ def check_ride(curr_ride, park, fp_r, curr_turn):  # Checks what to do with ride
         bd_start, bd_duration = next_bd.ret_info()  # Get exact breakdown info
 
     if curr_turn == bd_start:  # If ride needs to breakdown
-        print(f'{name} broke down')
         curr_ride.set_bd_status(True)
         curr_ride.set_bd_time(bd_duration)
         curr_ride.upd_bd_time()  # Include this turn in the breakdown duration
@@ -85,7 +84,6 @@ def check_ride(curr_ride, park, fp_r, curr_turn):  # Checks what to do with ride
         curr_ride.upd_bd_time()
         if bd_time == 0:  # If 'fixed'
             curr_ride.set_bd_status(False)
-            print(f'{name} fixed')
     else:  # If ride isn't broken down, do normal stuff
         match True:
             case _ if curr_ride.queues_empty():  # If no one is there to be loaded
@@ -93,7 +91,6 @@ def check_ride(curr_ride, park, fp_r, curr_turn):  # Checks what to do with ride
 
             case _ if ride_turn == max_turn:  # If ride needs to stop
                 ride_turn = 0
-                print(f'{name} unloading')
                 for space in range(0, current_rides):  # Takes guests off ride
                     curr_ride.off_ride(park)
                 curr_ride.rst_curr_riders()
@@ -102,10 +99,8 @@ def check_ride(curr_ride, park, fp_r, curr_turn):  # Checks what to do with ride
 
             case _ if ride_turn == 0:  # If ride needs to be loaded
                 load_ride(curr_ride, ride_cap, fp_r)
-                print(f'{name} loaded')
 
         ride_turn += 1  # Increase ride turns, only when not broken down
-        print(f'{name} turn increased')
 
     curr_ride.wait_time()  # Find the wait time at the end of the run
     curr_ride.fin_check_ride(ride_turn, rq, ride, fp_q)  # Updates all new info

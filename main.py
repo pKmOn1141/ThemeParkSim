@@ -45,7 +45,6 @@ if __name__ == '__main__':
         current_turn = 1
         print("started simulation")
         while current_turn <= max_turns:
-            print(current_turn)
 
             for current_ride in rides:  # Check all the rides
                 check_ride(current_ride, park, fp_ratio, current_turn)

@@ -159,10 +159,12 @@ class Ride(object):
         self._current_riders = 0
         self._current_wait = 0
 
+    def save_attributes(self):  # Return attributes needed for saving information
+        return self._name, self._ride_time, self._ride_cap, self._ride_pop, self._ride_type, self._ride_reliability
+
     def breakdowns(self, turns, min_b, max_b):  # Works out how many times it will break down in the 'day'
         amount = p.poisson(lam=self._ride_reliability, size=1)  # Amount of times it's going to break down
         amount = amount[0]
-        print(f'amount = {amount}')
         self._breakdowns = amount
         if amount == 0:
             return
@@ -175,7 +177,6 @@ class Ride(object):
                     start_turn = random.randrange(10, turns-duration)  # Pick when to breakdown in the range
 
                 start_times.append(start_turn)
-                print(start_turn, duration)
                 self._bd_schedu.append(Breakdowns(start_turn, duration))
 
         # Sort list by start time, so it doesn't need to check everytime
@@ -191,10 +192,6 @@ class Ride(object):
                             arr[j], arr[j + 1] = arr[j + 1], arr[j]
                         else:
                             swapped = False
-
-        print("printing breakdowns")
-        for i in self._bd_schedu:
-            print(i.ret_start())
 
     def ret_bd_stats(self):  # Return information related to breakdowns
         array = self._bd_schedu
@@ -293,6 +290,9 @@ class Amenity(object):  # Shops/Other services
 
     def ret_name(self):
         return self._name
+
+    def save_attributes(self):
+        return self._name, self._time
 
 
 if __name__ == '__main__':
