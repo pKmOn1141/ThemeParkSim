@@ -1,0 +1,279 @@
+# Code for gui
+
+import tkinter as tk
+from objects import Ride, Amenity
+
+BG_COLOR = "#b3b3b3"
+
+def edit_amenities():
+    print("Edit amenities")
+
+def edit_settings():
+    print("Edit settings")
+
+def data_imports():
+    print("Save/Load data")
+
+def start_sim():
+    print("Start sim")
+
+
+def main_menu(rides, amenities, guests, turns, fp_ratio):  # Main meunu window
+    # Creating the main window
+    root = tk.Tk()
+    root.title("Theme Park Sim - Main Menu")
+    root.geometry("600x400")
+    root.configure(bg=BG_COLOR)
+
+    # Create center frame for buttons
+    center_frame = tk.Frame(root)
+    center_frame.pack(expand=True, fill=tk.BOTH)
+
+    buttons = [
+        ("Edit rides", lambda: edit_object("R", rides)),
+        ("Edit amenities", lambda: edit_object("A", amenities)),
+        ("Edit settings", lambda: edit_settings),
+        ("Save/Load data", lambda: data_imports),
+        ("Start sim", lambda: start_sim)
+    ]
+
+    # Calculate size of buttons
+    max_text_length = max(len(text) for text, _ in buttons)
+    button_height = 2
+    button_width = max_text_length + 2
+
+    # Create buttons
+    for i, (text, command) in enumerate(buttons):
+        btn = tk.Button(center_frame, text=text, command=command, height=button_height, width=button_width, padx=10, pady=100)
+        btn['font'] = ('Ariel', 15)
+        btn.grid(row=i, column=0, sticky="ew")
+        center_frame.grid_rowconfigure(i, weight=1, uniform="buttons")
+        center_frame.grid_columnconfigure(0, weight=1, uniform="buttons")
+
+    root.mainloop()
+
+
+def edit_object(e_t, t_array):  # Screen to edit either rides or amenities
+    # Set variables to tell if something isn't working
+    title_name = "error"
+    o_type = "error"
+    c_names = "error"
+    # Check which type to use
+    match e_t:
+        case "R":
+            title_name = "Rides"
+            o_type = "Ride"
+            c_names = "Name, Time, Cap, Popularity, Type, Avg breakdowns"
+        case "A":
+            title_name = "Amenities"
+            o_type = "Amenity"
+            c_names = "Name, Avg time spent"
+
+    # Creating window
+    root = tk.Tk()
+    root.geometry("600x400")
+    root.title(f'Editing {title_name}')
+    root.configure(bg=BG_COLOR)
+
+    # Frame to hold buttons with padding
+    button_frame = tk.Frame(root, padx=12, pady=20, bg=BG_COLOR)
+    button_frame.pack(side=tk.LEFT, fill=tk.Y)
+
+    # Left hand buttons
+    button1 = tk.Button(button_frame, text=f'Add {o_type}', width=15, height=3)
+    button1.pack(side=tk.TOP, pady=10)
+    match e_t:  # Edit the functionality of button1 depending on what type
+        case "R":
+            button1.config(command=lambda: add_ride_window(t_array, text_box, c_names))
+        case "A":
+            button1.config(command=lambda: add_amenity_window(t_array, text_box, c_names))
+
+    button2 = tk.Button(button_frame, text=f'Remove {o_type}', width=15, height=3, command=lambda: remove_window(t_array, e_t, text_box, c_names))
+    button2.pack(side=tk.TOP, pady=10)
+    button3 = tk.Button(button_frame, text="Go back", width=15, height=3, command=lambda : go_back(root))
+    button3.pack(side=tk.BOTTOM, pady=10)
+
+    # Frame for the box with black outline
+    box_frame = tk.Frame(root, bd=2, relief=tk.SOLID)
+    box_frame.place(relx=0.6, rely=0.5, anchor=tk.CENTER, relwidth=0.75, relheight=0.9)
+    # Text widget in box
+    text_box = tk.Text(box_frame, wrap="word", bg="white")
+    text_box.pack(fill=tk.BOTH, expand=True)
+
+    update_text_box(c_names, t_array, text_box)
+
+    root.mainloop()
+
+
+def update_text_box(column_names, t_array, text_box):  # Updates data in the text box
+    text_box.delete('1.0', tk.END)  # Cleares text box first
+    text_box.insert(tk.END, f'{column_names}\n')
+    for curr in t_array:
+        text_box.insert(tk.END, f'{curr.save_attributes()}\n')
+
+
+def add_ride_window(rides, text_box, c_n):  # Menu for adding a new ride
+
+    def save_data(r_array):  # Function to save inputted data
+        names = []
+        for i in r_array:  # Make a list of all the used ride names
+            names.append(i.ret_name())
+
+        data = []
+        name = entry_boxes[0].get()
+        if name not in names:  # If name not already used
+            try:
+                for count, entry in enumerate(entry_boxes):  # Get data
+                    if count == 0:
+                        data.append(entry.get())
+                    else:  # Convert the numbers into integers
+                        data.append(int(entry.get()))
+
+                r_array.append(Ride(data[0], data[1], data[2], data[3], data[4], data[5]))  # Create ride object
+                update_text_box(c_n, rides, text_box)
+                print("Ride added")
+                root.destroy()
+            except:  # If any issue with inputs happen
+                error_label.config(text="Invalid inputs", fg="red")  # Activate error message
+                print("Invalid inputs")
+
+        else:  # If name already used
+            error_label.config(text="Name already used", fg="red")  # Activate error message
+
+    root = tk.Tk()
+    root.title("Add Ride")
+
+    # Create a frame to hold the input boxes and button
+    frame = tk.Frame(root)
+    frame.pack(padx=10, pady=10)
+
+    # Custom labels' text
+    entry_labels = ["Ride name:", "Ride time:", "Ride cap:", "Ride popularity:", "Ride type:", "Avg breakdowns:"]
+
+    # Create 6 input boxes
+    entry_boxes = []
+    for i, text in enumerate(entry_labels):
+        label = tk.Label(frame, text=text)
+        label.grid(row=i, column=0, padx=5, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=5, pady=5)
+        entry_boxes.append(entry)
+
+    # Create button to confirm input
+    confirm_button = tk.Button(root, text="Confirm", command=lambda: save_data(rides))
+    confirm_button.pack(pady=10)
+
+    error_label = tk.Label(root, fg="red")
+    error_label.pack()
+
+    root.mainloop()
+
+
+def add_amenity_window(amenities, txt_box, c_n):
+
+    def save_data(a_array):  # Function to save inputted data
+        names = []
+        for i in a_array:  # Make a list of all the used ride names
+            names.append(i.ret_name())
+
+        data = []
+        name = entry_boxes[0].get()
+        if name not in names:  # If name not already used
+            try:
+                for count, entry in enumerate(entry_boxes):  # Get data
+                    if count == 0:
+                        data.append(entry.get())
+                    else:  # Convert the numbers into integers
+                        data.append(int(entry.get()))
+
+                a_array.append(Amenity(data[0], data[1]))  # Create ride object
+                update_text_box(c_n, amenities, txt_box)
+                print("Amenity added")
+                root.destroy()
+            except:  # If any issue with inputs happen
+                error_label.config(text="Invalid inputs", fg="red")  # Activate error message
+                print("Invalid inputs")
+
+        else:  # If name already used
+            error_label.config(text="Name already used", fg="red")  # Activate error message
+
+    root = tk.Tk()
+    root.title("Add Amenity")
+
+    # Create a frame to hold the input boxes and button
+    frame = tk.Frame(root)
+    frame.pack(padx=10, pady=10)
+
+    # Custom labels' text
+    entry_labels = ["Amenity name:", "Time spent at amenity:"]
+
+    # Create boxes
+    entry_boxes = []
+    for i, text in enumerate(entry_labels):
+        label = tk.Label(frame, text=text)
+        label.grid(row=i, column=0, padx=5, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=5, pady=5)
+        entry_boxes.append(entry)
+
+    # Create button to confirm input
+    confirm_button = tk.Button(root, text="Confirm", command=lambda: save_data(amenities))
+    confirm_button.pack(pady=10)
+
+    error_label = tk.Label(root, fg="red")
+    error_label.pack()
+
+    root.mainloop()
+
+
+def remove_window(t_array, o_type, textbox, c_n):  # Window to remove ride/amenity
+    title = "error"
+    match o_type:
+        case "R":
+            title = "Ride"
+        case "A":
+            title = "Amenity"
+
+    def remove_object(t_array, title):
+        names = []
+        for curr in t_array:
+            names.append(curr.ret_name())
+
+        name = entry.get()
+        if name not in names:  # If name not found
+            error_label.config(text=f'{title} not found')
+        else:
+            for current in range(0, len(t_array)):
+                if t_array[current].ret_name().lower() == name.lower():
+                    t_array.remove(t_array[current])
+                    update_text_box(c_n, t_array, textbox)
+                    root.destroy()
+                    print("removed ride")
+                    break
+
+    root = tk.Tk()
+    root.title(f'Remove {title}')
+
+    frame = tk.Frame(root)
+    frame.pack(padx=10, pady=10)
+
+    label = tk.Label(frame, text=f'{title} name:')
+    label.grid(row=0, column=0, padx=5, pady=5)
+    entry = tk.Entry(frame)
+    entry.grid(row=0, column=1, padx=5, pady=5)
+
+    confirm_button = tk.Button(root, text="Confirm", command=lambda: remove_object(t_array, title))
+    confirm_button.pack(pady=10)
+
+    error_label = tk.Label(root, fg="red")
+    error_label.pack()
+
+    root.mainloop()
+
+
+def go_back(root):  # Function for go back buttons
+    root.destroy()
+
+
+if __name__ == '__main__':
+    main_menu()

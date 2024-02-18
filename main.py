@@ -13,7 +13,7 @@ if __name__ == '__main__':
     min_break = 1
     max_break = 8
 
-    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, max_guests, max_turns, fp_ratio, amenities)  # Main menu
+    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, amenities, max_guests, max_turns, fp_ratio)  # Main menu
     print("")
     # Prints key variables for testing
     print(rides, max_guests, max_turns)
