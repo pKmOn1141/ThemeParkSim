@@ -295,5 +295,17 @@ class Amenity(object):  # Shops/Other services
         return self._name, self._time
 
 
+class Settings(object):  # Object to hold simulation settings
+    def __init__(self, guests, turns, fp_ratio):
+        self._max_guests = guests
+        self._max_turns = turns
+        self._fp_ratio = fp_ratio
+
+    def ret_values(self):  # Return all the settings
+        return self._max_guests, self._max_turns, self._fp_ratio
+
+    def upd_values(self, data):  # Update all the settings
+        self._max_guests, self._max_turns, self._fp_ratio = data
+
 if __name__ == '__main__':
     print("objects.py")

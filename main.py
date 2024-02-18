@@ -5,15 +5,15 @@ from imports import *
 
 if __name__ == '__main__':
 
+    settings = Settings(0, 0, 0.0)
     rides = []
     amenities = []
-    max_guests = 0
-    max_turns = 0
-    fp_ratio = 0
     min_break = 1
     max_break = 8
 
-    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, amenities, max_guests, max_turns, fp_ratio)  # Main menu
+    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, amenities, settings)  # Main menu
+
+    max_guests, max_turns, fp_ratio = settings.ret_values()  # Takes settings out of object
     print("")
     # Prints key variables for testing
     print(rides, max_guests, max_turns)

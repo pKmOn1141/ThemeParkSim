@@ -17,6 +17,7 @@ def collect_type(array):  # Collect attributes out of the objects, storing them 
 
 
 def write_to_file(data, file_name):  # Write saved data into the file
+
     file = open(file_name, 'a')
 
     for item in data:
@@ -26,24 +27,26 @@ def write_to_file(data, file_name):  # Write saved data into the file
     file.close()
 
 
-def save_to_file(rides, amenities, settings):  # Combine all the saving functions into one
-    valid_name = False
-    while not valid_name:
-        file_name = str_validation("Enter file name: ") + ".txt"
-        try:
-            file = open(file_name, 'r')
-            print("File name already exists, try again.")
-            file.close()
-        except FileNotFoundError:
-            file = open(file_name, 'w')
-            valid_name = True
-            file.close()
+def save_to_file(rides, amenities, settings, file_name, e_l):  # Combine all the saving functions into one
+    settings = settings.ret_values()  # Take values from object
+    print(file_name)
 
-    write_to_file(collect_type(rides), file_name)
-    write_to_file(collect_type(amenities), file_name)
-    write_to_file(settings, file_name)
+    file_name = file_name + ".txt"
+    try:
+        file = open(file_name, 'r')
+        e_l.config(text="File name already exists, try another")
+        print("File name already exists, try again.")
+        file.close()
+    except FileNotFoundError:
+        file = open(file_name, 'w')
+        file.close()
 
-    print("Finished saving data")
+        write_to_file(collect_type(rides), file_name)
+        write_to_file(collect_type(amenities), file_name)
+        write_to_file(settings, file_name)
+
+        e_l.config(text="Data saved to file", fg="green")
+        print("Finished saving data")
 
 
 def convert_from_str(data):  # Turn the string data into a workable array
@@ -75,9 +78,12 @@ def import_settings(data):  # Turn the extracted settings string into individual
     return max_guests, max_turns, fp_ratio
 
 
-def read_from_file(file_name, r_array, a_array):
+def read_from_file(file_name, r_array, a_array, settings, e_l):  # Combines all loading functions
     try:
+        file_name = file_name + ".txt"
+        print(file_name)
         file = open(file_name, 'r')
+        print("opened file")
 
         # Extracting all the data types
         extracted_r = file.readline()
@@ -94,13 +100,14 @@ def read_from_file(file_name, r_array, a_array):
         create_objects(amenity_info, a_array, "A")
 
         # Turn the extracted settings into required data types and variables
-        m_guests, m_turns, fp_r = import_settings(extracted_s)
+        settings.upd_values(import_settings(extracted_s))
+        e_l.config(text="Data loaded", fg="green")
         print("Data loaded")
-        return m_guests, m_turns, fp_r
 
     except:  # If there is any problem whatsoever
         print("Unable to load information, setting values to default")
-        return 0, 0, 0
+        e_l.config(text="Unable to load info, setting values to default", fg="red")
+        settings.upd_values([0, 0, 0])
 
 
 if __name__ == '__main__':
