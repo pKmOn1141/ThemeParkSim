@@ -3,14 +3,12 @@
 import tkinter as tk
 from objects import Ride, Amenity
 from data_saving import save_to_file, read_from_file
+from simulation import simulation
 
 BG_COLOR = "#b3b3b3"
 
-def start_sim():
-    print("Start sim")
 
-
-def main_menu(rides, amenities, settings):  # Main meunu window
+def main_menu(rides, amenities, settings, min_break, max_break):  # Main meunu window
     # Creating the main window
     root = tk.Tk()
     root.title("Theme Park Sim - Main Menu")
@@ -26,7 +24,7 @@ def main_menu(rides, amenities, settings):  # Main meunu window
         ("Edit amenities", lambda: edit_object("A", amenities)),
         ("Edit settings", lambda: edit_settings(settings)),
         ("Save/Load settings", lambda: save_load_window(rides, amenities, settings)),
-        ("Start sim", lambda: start_sim)
+        ("Start sim", lambda: start_sim(root, rides, amenities, settings, min_break, max_break))
     ]
 
     # Calculate size of buttons
@@ -82,7 +80,7 @@ def edit_object(e_t, t_array):  # Screen to edit either rides or amenities
 
     button2 = tk.Button(button_frame, text=f'Remove {o_type}', width=15, height=3, command=lambda: remove_obj_window(t_array, e_t, text_box, c_names))
     button2.pack(side=tk.TOP, pady=10)
-    button3 = tk.Button(button_frame, text="Go back", width=15, height=3, command=lambda : go_back(root))
+    button3 = tk.Button(button_frame, text="Go back", width=15, height=3, command=lambda: go_back(root))
     button3.pack(side=tk.BOTTOM, pady=10)
 
     # Frame for the box with black outline
@@ -347,6 +345,26 @@ def save_load_window(rides, amenities, settings):
 
     error_label = tk.Label(root, fg="red", bg=BG_COLOR)
     error_label.place(relx=0.5, rely=0.8, anchor="center")
+
+    root.mainloop()
+
+
+def start_sim(menu_window, rides, amenities, settings, min_b, max_b):
+    menu_window.destroy()  # Clear menu window
+
+    root = tk.Tk()
+    root.title("Simulation In Progress")
+    root.config(bg=BG_COLOR)
+
+    simulation_label = tk.Label(root, text="Running Simulation", font=("Arial", 24), bg=BG_COLOR)
+    simulation_label.pack(pady=20)
+
+    turn_label = tk.Label(root, text="", font=("Arial", 18), bg=BG_COLOR)
+    turn_label.pack()
+
+    root.update()
+
+    simulation(rides, amenities, settings, min_b, max_b, turn_label, root)
 
     root.mainloop()
 

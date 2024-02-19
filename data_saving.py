@@ -81,9 +81,7 @@ def import_settings(data):  # Turn the extracted settings string into individual
 def read_from_file(file_name, r_array, a_array, settings, e_l):  # Combines all loading functions
     try:
         file_name = file_name + ".txt"
-        print(file_name)
         file = open(file_name, 'r')
-        print("opened file")
 
         # Extracting all the data types
         extracted_r = file.readline()

@@ -11,8 +11,9 @@ if __name__ == '__main__':
     min_break = 1
     max_break = 8
 
-    rides, max_guests, max_turns, fp_ratio, amenities = main_menu(rides, amenities, settings)  # Main menu
+    main_menu(rides, amenities, settings, min_break, max_break)  # Main menu
 
+    '''
     max_guests, max_turns, fp_ratio = settings.ret_values()  # Takes settings out of object
     print("")
     # Prints key variables for testing
@@ -63,3 +64,4 @@ if __name__ == '__main__':
 
         # Present data
         prin_basic_data(guest_list, rides)
+    '''
