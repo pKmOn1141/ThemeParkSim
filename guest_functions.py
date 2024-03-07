@@ -94,7 +94,7 @@ def choose_queue(fp_c):  # Choose whether to use fast pass queue or normal
 
 def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride, fp_c):  # Choose ride, customisable for each personality
     # max_waits=array of times, a/b=for type choice, ride_types=array of rides, guest=guest object
-    type_choice = choose_type(a, b, ride_types)  # Choose type, except for kids
+    type_choice = choose_type(a, b, ride_types)  # Choose type
 
     if type_choice == -1:  # If no choice found
         guest.change_status(-1)  # Tell guest to leave the park
@@ -109,8 +109,8 @@ def make_ride_choice(max_waits, a, b, ride_types, guest, multi_ride, fp_c):  # C
                 continue
 
         popularity, wait_time = ride.choose_ride_info()
-        if popularity > 4:  # If popularity is greater than 5
-            popularity = 4  # Use same conditions as if it were 5
+        if popularity > 4:  # If popularity is greater than 4
+            popularity = 4  # Use same conditions as if it were 4
         if wait_time < max_waits[popularity]:  # If wait is 'tolerable'
             fp = choose_queue(fp_c)
             add_to_queue(name, guest, ride, fp)  # Put into queue
@@ -155,7 +155,7 @@ def choose_ride(guest, ride_types):  # Incomplete
             max_waits = [170, 135, 100, 70, 40]
             fp_chance = 0.35
             multi_ride = True
-            make_ride_choice(max_waits, 3, 6, ride_types, guest, multi_ride, fp_chance)
+            make_ride_choice(max_waits, 4, 6, ride_types, guest, multi_ride, fp_chance)
 
         case 4:  # Child
             max_waits = [110, 80, 60, 40, 25]

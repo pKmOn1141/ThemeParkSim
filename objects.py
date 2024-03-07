@@ -216,6 +216,7 @@ class Ride(object):
         q_size = self._queues.queue_time()
         wait_time = (q_size // self._ride_cap) * self._ride_time  # Calculates the wait time
         self._current_wait = wait_time
+        print(f'{self._name} wait time = {wait_time}')
 
     def ret_wait_time(self):
         return self._current_wait
@@ -306,6 +307,7 @@ class Settings(object):  # Object to hold simulation settings
 
     def upd_values(self, data):  # Update all the settings
         self._max_guests, self._max_turns, self._fp_ratio = data
+
 
 if __name__ == '__main__':
     print("objects.py")

@@ -364,10 +364,76 @@ def start_sim(menu_window, rides, amenities, settings, min_b, max_b):
 
     root.update()
 
-    simulation(rides, amenities, settings, min_b, max_b, turn_label, root)
+    fin = simulation(rides, amenities, settings, min_b, max_b, turn_label, root)
+    if fin:  # If simulation finished
+        root.destroy()  # Destory current screen
+        data_screen()  # Open menu screen
+
+    root.mainloop()
+
+
+def update_data_box(d_type, column_names, text_box):  # Updates the data screens text box
+    text_box.configure(state='normal')
+    text_box.delete('1.0', tk.END)  # Cleares text box first
+    text_box.insert(tk.END, f'{column_names}\n')
+    text_box.insert(tk.END, f'Testing {d_type}')
+    text_box.configure(state='disabled')
+
+
+def show_data(d_type, text_box):  # Function to show data based on what button is pressed
+    match d_type:
+        case "R":
+            d_type = "Rides"
+            columns = "Data1, Data2, Data3, Data4"
+            update_data_box(d_type, columns, text_box)
+        case "A":
+            d_type = "Amenities"
+            columns = "Data1, Data2, Data3, Data4"
+            update_data_box(d_type, columns, text_box)
+        case "S":
+            d_type = "Stats"
+            columns = "Data1, Data2, Data3, Data4"
+            update_data_box(d_type, columns, text_box)
+
+
+def data_screen():
+    # Create new window
+    root = tk.Tk()
+    root.geometry("800x500")
+    root.title("Generated data")
+    root.configure(bg=BG_COLOR)
+
+    # Text box
+    text_frame = tk.Frame(root, bd=2, relief=tk.SOLID)
+    text_frame.place(relx=0.5, rely=0.35, anchor=tk.CENTER, relwidth=0.9, relheight=0.6)
+
+    text_scrollbar = tk.Scrollbar(text_frame)
+    text_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    text_box = tk.Text(text_frame, wrap="word", bg="white", yscrollcommand=text_scrollbar.set)
+    text_box.pack(fill=tk.BOTH, expand=True)
+    text_box.configure(state='disabled')
+
+    text_scrollbar.config(command=text_box.yview)
+
+    # Buttons
+    button_frame = tk.Frame(root, padx=12, pady=20, bg=BG_COLOR)
+    button_frame.place(relx=0.25, rely=0.95, anchor=tk.SW)
+
+    button1 = tk.Button(button_frame, text="Rides", width=18, height=4, command=lambda: show_data("R", text_box))
+    button1.pack(side=tk.LEFT, padx=10, pady=5)
+
+    button2 = tk.Button(button_frame, text="Amenities", width=18, height=4, command=lambda: show_data("A", text_box))
+    button2.pack(side=tk.LEFT, padx=10, pady=5)
+
+    button3 = tk.Button(button_frame, text="Stats", width=18, height=4, command=lambda: show_data("S", text_box))
+    button3.pack(side=tk.LEFT, padx=10, pady=5)
+
+    exit_button = tk.Button(root, text="Exit", width=10, height=2, command=lambda: go_back(root))
+    exit_button.place(relx=0.05, rely=0.95, anchor=tk.SW)
 
     root.mainloop()
 
 
 if __name__ == '__main__':
-    print("gui.py")
+    data_screen()

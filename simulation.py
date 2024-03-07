@@ -7,7 +7,9 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
     max_guests, max_turns, fp_ratio = settings.ret_values()  # Takes settings out of object
     print("")
     # Prints key variables for testing
-    print(rides, max_guests, max_turns)
+    print(rides)
+    print(amenities)
+    print(max_guests, max_turns, fp_ratio)
 
     # Check if there are any amenities
     if len(amenities) < 1:
@@ -57,3 +59,5 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
 
         # Present data
         prin_basic_data(guest_list, rides)
+
+    return True

@@ -48,18 +48,18 @@ def remove_ride(rides):  # Removes target ride
     if len(rides) == 0:  # If list empty
         print("No rides to remove")
         return
-    else:
+    else:  # If not
         target_ride = str_validation("Enter ride name to remove: ")
         index = -1
-        for current in range(0, len(rides)):
-            if rides[current].ret_name().lower() == target_ride.lower():
-                index = current
-                break
+        for current in range(0, len(rides)):  # Iterate through rides to find match
+            if rides[current].ret_name().lower() == target_ride.lower():  # If names match
+                index = current  # Save index of ride
+                break  # End iteration
 
         if index == -1:  # If item not found
             print("Couldn't find ride")
         else:
-            rides.remove(rides[index])
+            rides.remove(rides[index])  # Remove saved index from array
             print("Ride removed")
 
 

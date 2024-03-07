@@ -3,15 +3,15 @@
 def int_validation(output):  # Validates if an input is an integer
     correct = False
     inp = 0
-    while not correct:
-        inp = input(output)
-        try:
+    while not correct:  # Whilst invalid input
+        inp = input(output)  # Take in input
+        try:  # Try converting to integer
             inp = int(inp)
-            correct = True
-        except ValueError:
+            correct = True  # If it can, end iteration
+        except ValueError:  # If it cannot, repeat
             print("Invalid input, try again")
 
-    return inp
+    return inp  # Return inputted value
 
 
 def flt_validation(output):  # Validates input is a float
