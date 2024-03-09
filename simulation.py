@@ -33,6 +33,10 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
         for curr_ride in rides:
             curr_ride.breakdowns(max_turns, min_break, max_break)
 
+        # Calculate avg breakdown times
+        for curr_ride in rides:
+            curr_ride.find_avg_bd()
+
         # Ordering rides for guest checking
         ride_types = [[], [], [], [], [], [], []]  # Initialise the empty array
         ride_types = order_by_type(ride_types, rides)  # Storing what rides of each type are in 2d array
@@ -58,6 +62,6 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
         # End of simulation
 
         # Present data
-        prin_basic_data(guest_list, rides)
+        prin_basic_data(guest_list, rides, amenities, max_turns)
 
-    return True
+    return True, guest_list

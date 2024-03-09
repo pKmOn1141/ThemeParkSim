@@ -83,6 +83,9 @@ def add_to_queue(name, guest, ride, fp):  # Add guest into ride queue
             guest.add_ride(name)
             ride.into_queue(guest)
 
+    guest.upd_curr_wait(0)  # Reset current wait timer
+    ride.upd_total_riders()
+
 
 def choose_queue(fp_c):  # Choose whether to use fast pass queue or normal
     rand_num = random.random()  # Pick a random number between 0-1
@@ -166,6 +169,7 @@ def choose_ride(guest, ride_types):  # Incomplete
 
 def choose_amenity(amenities):  # Choose an amenity to use, and return how long the guest will be using that amenity
     choice = random.choice(amenities)
+    choice.increase_g_count()  # Increase guest counter
     time = choice.time_to_spend()  # Find time to spend for chosen amenity
 
     return time
@@ -197,6 +201,7 @@ def check_guest(guest, park, ride_types, any_amenities, amenities):  # Checks wh
                 choice = random.random()  # Pick random number between 0-1
                 if choice < amenity_chance:  # If chose to use amenity
                     guest.change_status(5)
+                    guest.upd_amenities_used()
                     time = choose_amenity(amenities)
                     guest.set_time_left(time)
 
@@ -207,6 +212,7 @@ def check_guest(guest, park, ride_types, any_amenities, amenities):  # Checks wh
 
         case 2:  # If guest in a queue
             guest.update_time()
+            guest.upd_curr_wait(1)  # Increase wait counter
 
         case 3:  # If guest on ride
             pass

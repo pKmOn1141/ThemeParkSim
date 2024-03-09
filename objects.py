@@ -29,14 +29,32 @@ class Park(object):
 class Guest(object):
     def __init__(self, name):
         self._name = f"Guest {name}"
-        self._wait_time = 0
+        self._wait_time = 0  # Total time spent in queues
         self._rides_ridden = 0
+        self._amenities_used = 0
         self._rides = []  # Array of the rides ridden
         self._queue_status = 0
         # 0=not in anything, 1=in park, 2=in queue, 3=on ride, 4=just off ride, 5=in amenity, -1=leaving park, -2=gone from park
         self._personality = -1
         # -1=unassigned, 0=average, 1=enthusiast, 2=tame, 3=thrillseeker, 4=child
         self._time_left = 0  # Time left to spend at amenity
+        self._current_wait = 0  # Time spent in current queue
+
+    def upd_amenities_used(self):
+        self._amenities_used += 1
+
+    def ret_am_used(self):
+        return self._amenities_used
+
+    def upd_curr_wait(self, val):  # Change the current wait attribute
+        match val:
+            case 0:  # Reset the value
+                self._current_wait = 0
+            case 1:  # Update the value
+                self._current_wait += 1
+
+    def ret_curr_wait(self):  # Return the current time waited
+        return self._current_wait
 
     def assign_p(self, personality):  # Assign guest personality
         self._personality = personality
@@ -94,17 +112,22 @@ class RQueues(object):
         self._fast_queue.put_nowait(item)
 
     def onto_ride(self, q_type):  # Puts the guest from queue onto ride
+        wait_time = 0
         # q_type: 0 = normal, 1 = fast pass
         match q_type:
             case 0:  # If coming from normal queue
                 guest = self._queue.get_nowait()
                 guest.change_status(3)
+                wait_time = guest.ret_curr_wait()  # Get wait time from guest
                 self._ride.put_nowait(guest)
 
             case 1:  # If coming from fast pass queue
                 guest = self._fast_queue.get_nowait()
                 guest.change_status(3)
+                wait_time = guest.ret_curr_wait()
                 self._ride.put_nowait(guest)
+
+        return wait_time
 
     def off_ride(self, park):  # Moves the guest off the ride and into the park
         guest = self._ride.get_nowait()
@@ -137,6 +160,9 @@ class Breakdowns(object):  # Stores the conditions of a ride breaking down
     def ret_start(self):
         return self._start_turn
 
+    def ret_duration(self):
+        return self._duration
+
     def ret_info(self):
         return self._start_turn, self._duration
 
@@ -158,9 +184,36 @@ class Ride(object):
         self._ride_turn = 0
         self._current_riders = 0
         self._current_wait = 0
+        self._total_riders = 0  # Stores how many people have ridden the ride in total
+        self._norm_riders = 0  # Tracks normal queue riders
+        self._fp_riders = 0  # Tracks fp queue riders
+        self._time_waited = 0  # Stores the average time waited
+        self._avg_breakd_time = 0  # Stores the average time brokendown
+
+    def ret_data(self, max_turns):  # Returns data for final screen
+        try:
+            average_wait = self._time_waited // self._total_riders
+        except ZeroDivisionError:
+            average_wait = 0
+
+        queue_ratio = f'{self._norm_riders}/{self._fp_riders}'  # Create the ratio between queues
+        return f'{self._name}  |  {self._total_riders}  |  {queue_ratio}  |  {average_wait}  |  {self._breakdowns}  |  {self._avg_breakd_time}'
+
+    def upd_total_riders(self):  # Update total riders counter
+        self._total_riders += 1
 
     def save_attributes(self):  # Return attributes needed for saving information
         return self._name, self._ride_time, self._ride_cap, self._ride_pop, self._ride_type, self._ride_reliability
+
+    def find_avg_bd(self):  # Calculates the average time brokendown
+        total = 0
+        for curr_bd in self._bd_schedu:  # Iterate breakdowns
+            total += curr_bd.ret_duration()
+
+        try:  # Find average
+            self._avg_breakd_time = total // len(self._bd_schedu)
+        except ZeroDivisionError:  # If cant, default to 0
+            self._avg_breakd_time = 0
 
     def breakdowns(self, turns, min_b, max_b):  # Works out how many times it will break down in the 'day'
         amount = p.poisson(lam=self._ride_reliability, size=1)  # Amount of times it's going to break down
@@ -216,7 +269,6 @@ class Ride(object):
         q_size = self._queues.queue_time()
         wait_time = (q_size // self._ride_cap) * self._ride_time  # Calculates the wait time
         self._current_wait = wait_time
-        print(f'{self._name} wait time = {wait_time}')
 
     def ret_wait_time(self):
         return self._current_wait
@@ -249,12 +301,15 @@ class Ride(object):
 
     def into_queue(self, item):
         self._queues.into_queue(item)
+        self._norm_riders += 1  # Increase counter
 
     def into_fast(self, item):  # Put into fast pass queue
         self._queues.into_fast(item)
+        self._fp_riders += 1  # Increase counter
 
     def onto_ride(self, q_type):
-        self._queues.onto_ride(q_type)
+        wait_t = self._queues.onto_ride(q_type)
+        self._time_waited += wait_t
 
     def off_ride(self, park):
         self._queues.off_ride(park)
@@ -280,6 +335,7 @@ class Amenity(object):  # Shops/Other services
     def __init__(self, name, time):
         self._name = name
         self._time = time  # Time spent at service
+        self._guest_count = 0  # Amount of guests that have used the amenity
 
     def time_to_spend(self):  # Returns how long guest should spend at amenity
         time = self._time
@@ -289,11 +345,21 @@ class Amenity(object):  # Shops/Other services
             times = [time-1, time, time+1]  # How long guest can spend at amenity, varying for each
         return random.choice(times)
 
+    def increase_g_count(self):  # Increase guest counter
+        self._guest_count += 1
+
+    def ret_g_count(self):
+        return self._guest_count
+
     def ret_name(self):
         return self._name
 
     def save_attributes(self):
         return self._name, self._time
+
+    def ret_data(self, max_turns):  # Function to return collected data
+        average = int(self._guest_count / max_turns)
+        return f'{self._name} | {self._guest_count} | {average}'
 
 
 class Settings(object):  # Object to hold simulation settings
@@ -307,6 +373,9 @@ class Settings(object):  # Object to hold simulation settings
 
     def upd_values(self, data):  # Update all the settings
         self._max_guests, self._max_turns, self._fp_ratio = data
+
+    def ret_max_turns(self):
+        return self._max_turns
 
 
 if __name__ == '__main__':

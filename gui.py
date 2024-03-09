@@ -4,6 +4,7 @@ import tkinter as tk
 from objects import Ride, Amenity
 from data_saving import save_to_file, read_from_file
 from simulation import simulation
+from data_funcs import gen_stats
 
 BG_COLOR = "#b3b3b3"
 
@@ -364,43 +365,53 @@ def start_sim(menu_window, rides, amenities, settings, min_b, max_b):
 
     root.update()
 
-    fin = simulation(rides, amenities, settings, min_b, max_b, turn_label, root)
+    fin, guest_list = simulation(rides, amenities, settings, min_b, max_b, turn_label, root)
     if fin:  # If simulation finished
         root.destroy()  # Destory current screen
-        data_screen()  # Open menu screen
+        data_screen(rides, amenities, settings, guest_list)  # Open menu screen
 
     root.mainloop()
 
 
-def update_data_box(d_type, column_names, text_box):  # Updates the data screens text box
+def update_data_box(column_names, text_box, data, max_turns):  # Updates the data screens text box
     text_box.configure(state='normal')
     text_box.delete('1.0', tk.END)  # Cleares text box first
     text_box.insert(tk.END, f'{column_names}\n')
-    text_box.insert(tk.END, f'Testing {d_type}')
+    for curr in data:
+        text_box.insert(tk.END, f'{curr.ret_data(max_turns)}\n')  # Print the objects information
     text_box.configure(state='disabled')
 
 
-def show_data(d_type, text_box):  # Function to show data based on what button is pressed
+def update_stats_box(column, text_box, guest_list, rides, amenities):  # Updates data screen for stats
+    text_box.configure(state='normal')
+    text_box.delete('1.0', tk.END)  # Cleares text box first
+    text_box.insert(tk.END, f'{column}\n')
+    text_box.insert(tk.END, gen_stats(guest_list, rides, amenities))
+    text_box.configure(state='disabled')
+
+
+def show_stats(text_box, guest_list, rides, amenities):  # Deals with the stats screen
+    columns = "Avg Rides Ridden | Avg Amenities Used | Avg Total Time Waited"
+    update_stats_box(columns, text_box, guest_list, rides, amenities)
+
+
+def show_data(d_type, text_box, data, max_turns):  # Function to show data based on what button is pressed
     match d_type:
         case "R":
-            d_type = "Rides"
-            columns = "Data1, Data2, Data3, Data4"
-            update_data_box(d_type, columns, text_box)
+            columns = "Name | Total Riders | Normal/Fastpass ratio | Avg Wait Time | Total Bds | Avg Bd time"
+            update_data_box(columns, text_box, data, max_turns)
         case "A":
-            d_type = "Amenities"
-            columns = "Data1, Data2, Data3, Data4"
-            update_data_box(d_type, columns, text_box)
-        case "S":
-            d_type = "Stats"
-            columns = "Data1, Data2, Data3, Data4"
-            update_data_box(d_type, columns, text_box)
+            columns = "Name | Total Guests Used | Average Guests per Turn"
+            update_data_box(columns, text_box, data, max_turns)
 
 
-def data_screen():
+def data_screen(rides, amenities, settings, guest_list):
+    max_turns = settings.ret_max_turns()
+
     # Create new window
     root = tk.Tk()
     root.geometry("800x500")
-    root.title("Generated data")
+    root.title("Simulation results")
     root.configure(bg=BG_COLOR)
 
     # Text box
@@ -420,13 +431,13 @@ def data_screen():
     button_frame = tk.Frame(root, padx=12, pady=20, bg=BG_COLOR)
     button_frame.place(relx=0.25, rely=0.95, anchor=tk.SW)
 
-    button1 = tk.Button(button_frame, text="Rides", width=18, height=4, command=lambda: show_data("R", text_box))
+    button1 = tk.Button(button_frame, text="Rides", width=18, height=4, command=lambda: show_data("R", text_box, rides, max_turns))
     button1.pack(side=tk.LEFT, padx=10, pady=5)
 
-    button2 = tk.Button(button_frame, text="Amenities", width=18, height=4, command=lambda: show_data("A", text_box))
+    button2 = tk.Button(button_frame, text="Amenities", width=18, height=4, command=lambda: show_data("A", text_box, amenities, max_turns))
     button2.pack(side=tk.LEFT, padx=10, pady=5)
 
-    button3 = tk.Button(button_frame, text="Stats", width=18, height=4, command=lambda: show_data("S", text_box))
+    button3 = tk.Button(button_frame, text="Stats", width=18, height=4, command=lambda: show_stats(text_box, guest_list, rides, amenities))
     button3.pack(side=tk.LEFT, padx=10, pady=5)
 
     exit_button = tk.Button(root, text="Exit", width=10, height=2, command=lambda: go_back(root))
@@ -436,4 +447,4 @@ def data_screen():
 
 
 if __name__ == '__main__':
-    data_screen()
+    print("gui.py")
