@@ -18,7 +18,7 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
         any_amenities = True
 
     # Pre-simulation checks
-    if len(rides) == 0 or max_guests == 0 or max_turns == 0:
+    if len(rides) == 0 or max_guests == 0 or max_turns <= 15:
         ready_to_start = False
     else:
         ready_to_start = True
@@ -26,6 +26,7 @@ def simulation(rides, amenities, settings, min_break, max_break, turn_label, win
     # Simulation
     if not ready_to_start:
         print("Key variables invalid, cancelling simulation")
+        return False, []
     else:
         guest_list = initialise_guests(max_guests)  # Sets up the guests
 

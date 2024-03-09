@@ -227,7 +227,7 @@ class Ride(object):
                 duration = random.randrange(min_b, max_b)  # How long ride will be broken down for
                 start_turn = -1
                 while start_turn in start_times:
-                    start_turn = random.randrange(10, turns-duration)  # Pick when to breakdown in the range
+                    start_turn = random.randrange(3, turns-duration)  # Pick when to breakdown in the range
 
                 start_times.append(start_turn)
                 self._bd_schedu.append(Breakdowns(start_turn, duration))

@@ -369,6 +369,8 @@ def start_sim(menu_window, rides, amenities, settings, min_b, max_b):
     if fin:  # If simulation finished
         root.destroy()  # Destory current screen
         data_screen(rides, amenities, settings, guest_list)  # Open menu screen
+    else:
+        turn_label.config(text="Error running simulation, try again", fg="red")
 
     root.mainloop()
 
